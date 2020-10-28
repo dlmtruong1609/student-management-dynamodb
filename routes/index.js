@@ -1,11 +1,14 @@
 /**
  * @author Đặng Lê Minh Trường (dlmtruong1609@gmail.com)
- * @description CRUD Students
+ * @description Render UI CRUD Students
  */
 var express = require('express');
 var router = express.Router();
-require('dotenv').config()
+const request = require('request');
+const util = require('util')
+var uuid = require('node-uuid');
 var AWS = require("aws-sdk");
+const { parse } = require('path');
 require('dotenv').config()
 AWS.config.update({
   region: "us-west-2",
@@ -13,70 +16,93 @@ AWS.config.update({
   secretAccessKey: process.env.SECRET_ACCESS_KEY
 });
 
-
 var docClient = new AWS.DynamoDB.DocumentClient();
-var table = "students";
 
-var params = {
-  TableName: table
-};
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-// Get all
-router.get('/students', (req, res) => {
-  docClient.scan(params, function(err, data) {
+router.get('/', async (req, res) => {
+  var params = {
+    TableName: 'students'
+  };
+  let students = await []
+  await docClient.scan(params, async function(err, data) {
     if (err) {
         res.status(500).send(err)
     } else {
-        res.send(data.Items);
+      students = await data.Items
+      docClient.scan({
+        TableName: 'classes'
+      }, function(err, data) {
+        if (err) {
+            res.status(500).send(err)
+        } else {
+          res.render('index', { students: students, classes: data.Items });
+        }
+      });
     }
+  });
 });
+
+// render student not api
+router.get('/students/delete/:id', async (req, res) => {
+  const options = {
+    TableName: 'students',
+    Key:{
+     'ma_sinhvien': req.params.id
+    },
+  }
+  docClient.delete(options, function(err, data) {
+    if (err) {
+        res.status(500).send(err)
+    } else {
+      res.redirect('/')
+    }
+  })
+});
+
+router.post('/students/add', (req, res) => {
+  const options = {
+    TableName: 'students',
+    Item: {
+      id: uuid.v1(),
+      ma_sinhvien: req.body.ma_sinhvien,
+      ten_sinhvien: req.body.ten_sinhvien,
+      namsinh: req.body.namsinh,
+      id_lop: req.body.id_lop,
+      avatar: req.body.avatar
+    }
+  }
+  docClient.put(options, function(err, data) {
+    if (err) {
+        res.status(500).send(err)
+    } else {
+        res.redirect("/")
+    }
+  });
 })
 
-
-// Get user by ma_sinhvien
-router.get('/students/:id', (req, res) => {
+router.get('/students/update/form/:id', (req, res) => {
   const ma_sinhvien = req.params.id;
-  console.log(ma_sinhvien);
-  params.Key = {
-    'ma_sinhvien': ma_sinhvien
+  const options = {
+    TableName: 'students',
+    Key: {
+      'ma_sinhvien': ma_sinhvien
+    }
   }
-  docClient.get(params, function(err, data) {
+  docClient.get(options, function(err, data) {
     if (err) {
         res.status(500).send(err)
     } else {
-        res.send(data);
+      res.render('StudentFormUpdate', {
+        student: data.Item
+      })
     }
   })
 })
 
-// create new user
-router.post('/students', (req, res) => {
-  params.Item = {
-    id: req.body.id,
-    ma_sinhvien: req.body.ma_sinhvien,
-    ten_sinhvien: req.body.ten_sinhvien,
-    namsinh: req.body.namsinh,
-    id_lop: req.body.id_lop,
-    avatar: req.body.avatar
-  }
-  docClient.put(params, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Create Success")
-    }
-});
-})
-
-
-// update user by ma_sinhvien
-router.put('/students', (req, res) => {
-  params.Item = {...params,
+router.post('/students/update/:id', (req, res) => {
+  const options = {
+    TableName: 'students',
     Key: {
       ma_sinhvien: req.params.id
     },
@@ -85,33 +111,94 @@ router.put('/students', (req, res) => {
         ":name": req.body.ten_sinhvien,
         ":birthday": req.body.namsinh,
         ":avatar": req.body.avatar,
-        "class": req.body.id_lop
+        ":class": req.body.id_lop
     },
     ReturnValues:"UPDATED_NEW"
   }
-  docClient.put(params, function(err, data) {
+  docClient.update(options, function(err, data) {
     if (err) {
         res.status(500).send(err)
     } else {
-        res.send("Updated Success")
+        res.redirect('/')
     }
-});
+  });
 })
+// end render students 
 
-// delete user by ma_sinhvien
-router.delete('/students/:id', (req, res) => {
-  params = {
-    ...params,
+// render classes not api
+
+router.get('/classes/delete/:id', async (req, res) => {
+  const options = {
+    TableName: 'classes',
     Key:{
-     'ma_sinhvien': req.params.id
+     'ma_lop': req.params.id
     },
   }
-  docClient.delete(params, function(err, data) {
+  docClient.delete(options, function(err, data) {
     if (err) {
         res.status(500).send(err)
     } else {
-        res.send("Deleted Success")
+      res.redirect('/')
     }
   })
+});
+
+router.post('/classes/add', (req, res) => {
+  const options = {
+    TableName: 'classes',
+    Item: {
+      id: uuid.v1(),
+      ma_lop: req.body.ma_lop,
+      ten: req.body.ten
+    }
+  }
+  docClient.put(options, function(err, data) {
+    if (err) {
+        res.status(500).send(err)
+    } else {
+        res.redirect("/")
+    }
+  });
+})
+
+router.get('/classes/update/form/:id', (req, res) => {
+  const ma_lop = req.params.id;
+  const options = {
+    TableName: 'classes',
+    Key: {
+      'ma_lop': ma_lop
+    }
+  }
+  docClient.get(options, function(err, data) {
+    if (err) {
+        res.status(500).send(err)
+    } else {
+      console.log(data);
+      res.render('ClassFormUpdate', {
+        classItem: data.Item
+      })
+    }
+  })
+})
+
+router.post('/classes/update/:id', (req, res) => {
+  const options = {
+    TableName: 'classes',
+    Key: {
+      ma_lop: req.params.id
+    },
+    UpdateExpression: "set ten = :name",
+    ExpressionAttributeValues:{
+        ":name": req.body.ten
+    },
+    ReturnValues:"UPDATED_NEW"
+  }
+  docClient.update(options, function(err, data) {
+    if (err) {
+        res.status(500).send(err)
+    } else {
+        res.redirect('/')
+    }
+  });
 })
 module.exports = router;

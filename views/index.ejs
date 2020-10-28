@@ -1,42 +1,150 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>Quan ly sinh vien</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   </head>
   <body>
-    <h1>Quan ly sinh vien</h1>
+    <h1>Quan ly Lop hoc</h1>
+    <button class="btn btn-primary" data-toggle="modal" data-target="#modalClass">Create</button>
     <table class="table">
       <thead>
         <tr>
           <th scope="col">#</th>
-          <th scope="col">First</th>
-          <th scope="col">Last</th>
-          <th scope="col">Handle</th>
+          <th scope="col">id</th>
+          <th scope="col">Ma lop</th>
+          <th scope="col">Ten lop</th>
+          <th scope="col">Action</th>
         </tr>
       </thead>
       <tbody>
+        <% for(let i = 0; i< classes.length; i++) { %>
         <tr>
-          <th scope="row">1</th>
-          <td>Mark</td>
-          <td>Otto</td>
-          <td>@mdo</td>
+          <th scope="row"><%=i%></th>
+          <td><%=classes[i].id%></td>
+          <td><%=classes[i].ma_lop%></td>
+          <td><%=classes[i].ten%></td>
+          <td>
+            <a class="btn btn-danger mr-1" href="/classes/delete/<%=classes[i].ma_lop%>">Delete</a>
+            <a class="btn btn-success" href="/classes/update/form/<%=classes[i].ma_lop%>" >Update</a</td>
+          </td>
         </tr>
-        <tr>
-          <th scope="row">2</th>
-          <td>Jacob</td>
-          <td>Thornton</td>
-          <td>@fat</td>
-        </tr>
-        <tr>
-          <th scope="row">3</th>
-          <td>Larry</td>
-          <td>the Bird</td>
-          <td>@twitter</td>
-        </tr>
+        <% } %>
       </tbody>
     </table>
+
+    <h1>Quan ly sinh vien</h1> 
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+      Create
+    </button>
+    <% if(students.length) { %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">id</th>
+          <th scope="col">Ma sinh vien</th>
+          <th scope="col">Ten sinh vien</th>
+          <th scope="col">Nam sinh</th>
+          <th scope="col">Ten lop</th>
+          <th scope="col">avatar</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(let i = 0; i< students.length; i++) { %>
+        <tr>
+          <th scope="row">1</th>
+          <td><%= students[i].id%></td>
+          <td><%= students[i].ma_sinhvien%></td>
+          <td><%= students[i].ten_sinhvien%></td>
+          <td><%= students[i].namsinh%></td>
+          <td><%= students[i].id_lop%></td>
+          <td><%= students[i].avatar%></td>
+          <td>
+            <a class="btn btn-danger mr-1" href="/students/delete/<%=students[i].ma_sinhvien%>">Delete</a>
+            <a class="btn btn-success" href="/students/update/form/<%=students[i].ma_sinhvien%>" >Update</a</td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+    <% } %>
+  <!-- Modal create class -->
+  <div class="modal fade" id="modalClass" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Create new class</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="/classes/add" method="POST">
+            <div class="form-group">
+              <label for="">Ma lop hoc</label>
+              <input type="text" name="ma_lop" class="form-control" aria-describedby="">
+            </div>
+            <div class="form-group">
+              <label for="">Ten lop</label>
+              <input type="text" name="ten" class="form-control" aria-describedby="">
+            </div>
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+      <!-- Modal create student -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Create new student</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="/students/add" method="POST">
+                <div class="form-group">
+                  <label for="">Ma sinh vien</label>
+                  <input type="text" name="ma_sinhvien" class="form-control" aria-describedby="">
+                </div>
+                <div class="form-group">
+                  <label for="">Ten sinh vien</label>
+                  <input type="text" name="ten_sinhvien" class="form-control"  aria-describedby="">
+                </div>
+                <div class="form-group">
+                  <label for="">Nam sinh</label>
+                  <input type="text" name="namsinh" class="form-control"  aria-describedby="">
+                </div>
+                <div class="form-group">
+                  <label for="">Ten Lop</label>
+                  <select class="form-control" id="id_lop" name="id_lop">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="">Avatar</label>
+                  <input type="text" name="avatar" class="form-control" aria-describedby="">
+                </div>
+                <button type="submit" class="btn btn-primary">Add</button>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
