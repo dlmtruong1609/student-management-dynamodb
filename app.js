@@ -3,16 +3,26 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const fileUpload = require('express-fileupload');
 var indexRouter = require('./routes/index');
 var studentsRouter = require('./routes/students');
 var classesRouter = require('./routes/class');
+var uploadRouter = require('./routes/upload');
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+
+// enable file upload
+app.use(fileUpload({
+  createParentPath: true,
+  limits: { fileSize: 1000 * 1024 * 1024 }
+}))
+
+app.use('/', uploadRouter);
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -39,5 +49,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
 
 module.exports = app;

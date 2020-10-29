@@ -30,6 +30,51 @@
             <a class="btn btn-success" href="/classes/update/form/<%=classes[i].ma_lop%>" >Update</a</td>
           </td>
         </tr>
+                      <!-- Modal create student -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Create new student</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="/students/add" method="POST">
+                <div class="form-group">
+                  <label for="">Ma sinh vien</label>
+                  <input type="text" name="ma_sinhvien" class="form-control" aria-describedby="">
+                </div>
+                <div class="form-group">
+                  <label for="">Ten sinh vien</label>
+                  <input type="text" name="ten_sinhvien" class="form-control"  aria-describedby="">
+                </div>
+                <div class="form-group">
+                  <label for="">Nam sinh</label>
+                  <input type="text" name="namsinh" class="form-control"  aria-describedby="">
+                </div>
+                <div class="form-group">
+                  <label for="">Ten Lop</label>
+                  <select class="form-control" id="id_lop" name="id_lop">
+                    <% for(let i = 0; i< classes.length; i++) { %>
+                    <option value="<%= classes[i].ma_lop%>"><%= classes[i].ten%></option>
+                    <% } %>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="">Avatar</label>
+                  <input type="text" name="avatar" class="form-control" aria-describedby="">
+                </div>
+                <button type="submit" class="btn btn-primary">Add</button>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
         <% } %>
       </tbody>
     </table>
@@ -55,13 +100,13 @@
       <tbody>
         <% for(let i = 0; i< students.length; i++) { %>
         <tr>
-          <th scope="row">1</th>
+          <th scope="row"><%=i%></th>
           <td><%= students[i].id%></td>
           <td><%= students[i].ma_sinhvien%></td>
           <td><%= students[i].ten_sinhvien%></td>
           <td><%= students[i].namsinh%></td>
           <td><%= students[i].id_lop%></td>
-          <td><%= students[i].avatar%></td>
+          <td><%if(students[i].avatar) {%><img style="width: 100px; height: 100px;" class="img-thumbnail" src="<%= students[i].avatar%>" alt=""><%}%></td>
           <td>
             <a class="btn btn-danger mr-1" href="/students/delete/<%=students[i].ma_sinhvien%>">Delete</a>
             <a class="btn btn-success" href="/students/update/form/<%=students[i].ma_sinhvien%>" >Update</a</td>
@@ -99,52 +144,7 @@
       </div>
     </div>
   </div>
-      <!-- Modal create student -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Create new student</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form action="/students/add" method="POST">
-                <div class="form-group">
-                  <label for="">Ma sinh vien</label>
-                  <input type="text" name="ma_sinhvien" class="form-control" aria-describedby="">
-                </div>
-                <div class="form-group">
-                  <label for="">Ten sinh vien</label>
-                  <input type="text" name="ten_sinhvien" class="form-control"  aria-describedby="">
-                </div>
-                <div class="form-group">
-                  <label for="">Nam sinh</label>
-                  <input type="text" name="namsinh" class="form-control"  aria-describedby="">
-                </div>
-                <div class="form-group">
-                  <label for="">Ten Lop</label>
-                  <select class="form-control" id="id_lop" name="id_lop">
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="">Avatar</label>
-                  <input type="text" name="avatar" class="form-control" aria-describedby="">
-                </div>
-                <button type="submit" class="btn btn-primary">Add</button>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            </div>
-          </div>
-        </div>
-      </div>
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

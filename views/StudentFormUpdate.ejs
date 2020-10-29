@@ -12,7 +12,7 @@
             <div class="col-md-8">
                 <h1>Form update student</h1>
                     <!-- Form Update -->
-    <form action="/students/update/<%=student.ma_sinhvien%>" method="POST">
+    <form action="/students/update/<%=student.ma_sinhvien%>" enctype="multipart/form-data" method="POST">
         <div class="form-group">
             <label for="">Ten sinh vien</label>
             <input type="text" name="ten_sinhvien" value="<%=student.ten_sinhvien%>" class="form-control" id="name" aria-describedby="">
@@ -24,15 +24,14 @@
         <div class="form-group">
             <label for="">Ten Lop</label>
             <select class="form-control" id="id_lop" name="id_lop">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
+            <% for(let i = 0; i< classes.length; i++) { %>
+                <option value="<%= classes[i].ma_lop%>"><%= classes[i].ten%></option>
+            <% } %>
             </select>
         </div>
         <div class="form-group">
             <label for="">Avatar</label>
-            <input type="text" name="avatar" value="<%=student.ma_sinhvien%>" class="form-control" id="name" aria-describedby="">
+            <input type="file" name="avatar" class="form-control-file" id="exampleFormControlFile1">  
         </div>
         <a href="/" class="btn btn-danger">Cancel</a>
         <button type="submit" class="btn btn-primary">Update</button>

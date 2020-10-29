@@ -3,115 +3,71 @@
  * @description API CRUD Students
  */
 var express = require('express');
-var uuid = require('node-uuid');
 var router = express.Router();
-var AWS = require("aws-sdk");
+
+const studentsDao = require('../daos/students.dao')
+var uuid = require('node-uuid');
 require('dotenv').config()
-AWS.config.update({
-  region: "us-west-2",
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY
-});
 
-
-var docClient = new AWS.DynamoDB.DocumentClient();
-var table = "students";
-
-var params = {
-  TableName: table
-};
 // Get all
-router.get('/students', (req, res) => {
-  docClient.scan(params, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send(data.Items);
-    }
-  });
+router.get('/students', async (req, res) => {
+  const students = await studentsDao.getAll();
+  res.send(students);
 })
 
 
 // Get user by ma_sinhvien
-router.get('/students/:id', (req, res) => {
+router.get('/students/:id', async (req, res) => {
   const ma_sinhvien = req.params.id;
-  console.log(ma_sinhvien);
-  const options = {
-    ...params,
-    Key: {
-      'ma_sinhvien': ma_sinhvien
-    }
-  }
-  docClient.get(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send(data.Item);
-    }
-  })
+  const student = await studentsDao.getSingleById(ma_sinhvien);
+  res.send(student);
 })
 
 // create new user
-router.post('/students', (req, res) => {
-  const options = {
-    ...params,
-    Item: {
-      id: uuid.v1(),
-      ma_sinhvien: req.body.ma_sinhvien,
-      ten_sinhvien: req.body.ten_sinhvien,
-      namsinh: req.body.namsinh,
-      id_lop: req.body.id_lop,
-      avatar: req.body.avatar
-    }
+router.post('/students', async (req, res) => {
+  const student = {
+    id: uuid.v1(),
+    ma_sinhvien: req.body.ma_sinhvien,
+    ten_sinhvien: req.body.ten_sinhvien,
+    namsinh: req.body.namsinh,
+    id_lop: req.body.id_lop,
+    avatar: req.body.avatar
   }
-  docClient.put(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Create Success")
-    }
-});
+  const success = await studentsDao.add(student)
+  if(success) {
+    res.send('Create Success');
+  } else {
+    res.status(400).send("Invalid")
+  }
 })
 
 
 // update user by ma_sinhvien
-router.put('/students/:id', (req, res) => {
-  const options = {...params,
-    Key: {
-      ma_sinhvien: req.params.id
-    },
-    UpdateExpression: "set ten_sinhvien = :name, namsinh=:birthday, avatar=:avatar, id_lop=:class",
-    ExpressionAttributeValues:{
-        ":name": req.body.ten_sinhvien,
-        ":birthday": req.body.namsinh,
-        ":avatar": req.body.avatar,
-        ":class": req.body.id_lop
-    },
-    ReturnValues:"UPDATED_NEW"
+router.put('/students/:id', async (req, res) => {
+  const student = {
+    ma_sinhvien: req.params.id,
+    ten_sinhvien: req.body.ten_sinhvien,
+    namsinh: req.body.namsinh,
+    id_lop: req.body.id_lop,
+    avatar: req.body.avatar
   }
-  docClient.update(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Updated Success")
-    }
-});
+  const success = await studentsDao.update(student);
+  if(success) {
+    res.send('Update Success');
+  } else {
+    res.status(400).send("Invalid")
+  }
 })
 
 // delete user by ma_sinhvien
-router.delete('/students/:id', (req, res) => {
-  const options = {
-    ...params,
-    Key:{
-     'ma_sinhvien': req.params.id
-    },
+router.delete('/students/:id', async (req, res) => {
+  const ma_sinhvien = req.params.id;
+  const success = await studentsDao.delete(ma_sinhvien);
+  if(success) {
+    res.send('Delete Success');
+  } else {
+    res.status(400).send("Invalid")
   }
-  docClient.delete(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Deleted Success")
-    }
-  })
 })
+
 module.exports = router;

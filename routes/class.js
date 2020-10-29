@@ -4,107 +4,60 @@
  */
 var express = require('express');
 var uuid = require('node-uuid');
+const classesDao = require('../daos/classes.dao');
 var router = express.Router();
-var AWS = require("aws-sdk");
-require('dotenv').config()
-AWS.config.update({
-  region: "us-west-2",
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY
-});
-
-
-var docClient = new AWS.DynamoDB.DocumentClient();
-var table = "classes";
-
-var params = {
-  TableName: table
-};
 // Get all
-router.get('/classes', (req, res) => {
-  docClient.scan(params, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send(data.Items);
-    }
-  });
+router.get('/classes', async (req, res) => {
+  const classes = await classesDao.getAll();
+  res.send(classes);
 })
 
 
 // Get user by ma_lop
-router.get('/classes/:id', (req, res) => {
+router.get('/classes/:id', async (req, res) => {
   const ma_lop = req.params.id;
-  const options = {
-    ...params,
-    Key: {
-      'ma_lop': ma_lop
-    }
-  }
-  docClient.get(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send(data.Item);
-    }
-  })
+  const classroom = await classesDao.getSingleById(ma_lop);
+  res.send(classroom);
 })
 
 // create new class
-router.post('/classes', (req, res) => {
-  const options = {
-    ...params,
-    Item: {
-      id: uuid.v1(),
-      ma_lop: req.body.ma_lop,
-      ten: req.body.ten
-    }
+router.post('/classes', async (req, res) => {
+  const classroom = {
+    id: uuid.v1(),
+    ma_lop: req.body.ma_lop,
+    ten: req.body.ten
   }
-  docClient.put(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Create Success")
-    }
-});
+  const success = await classesDao.add(classroom)
+  if(success) {
+    res.send('Create Success');
+  } else {
+    res.status(400).send("Invalid")
+  }
 })
 
 
 // update class by ma_lop
-router.put('/classes/:id', (req, res) => {
-  const options = {...params,
-    Key: {
-      ma_lop: req.params.id
-    },
-    UpdateExpression: "set ten = :name",
-    ExpressionAttributeValues:{
-        ":name": req.body.ten,
-    },
-    ReturnValues:"UPDATED_NEW"
+router.put('/classes/:id', async (req, res) => {
+  const classroom = {
+    ma_lop: req.params.id,
+    ten: req.body.ten,
   }
-  docClient.update(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Updated Success")
-    }
-});
+  const success = await classesDao.update(classroom);
+  if(success) {
+    res.send('Update Success');
+  } else {
+    res.status(400).send("Invalid")
+  }
 })
 
 // delete class by ma_lop
-router.delete('/classes/:id', (req, res) => {
-  const options = {
-    ...params,
-    Key:{
-     'ma_lop': req.params.id
-    },
+router.delete('/classes/:id', async (req, res) => {
+  const ma_lop = req.params.id;
+  const success = await classesDao.delete(ma_lop);
+  if(success) {
+    res.send('Delete Success');
+  } else {
+    res.status(400).send("Invalid")
   }
-  docClient.delete(options, function(err, data) {
-    if (err) {
-        res.status(500).send(err)
-    } else {
-        res.send("Deleted Success")
-    }
-  })
 })
 module.exports = router;
